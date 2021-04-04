@@ -29,6 +29,13 @@ public class Card implements Comparable {
     public static final int ZEHN = 13;
     public static final int AS = 14;
 
+    public static final Card COVERED = new Card();
+
+    private Card() {
+        this.color = -1;
+        this.value = -1;
+    }
+
     /**
      * Konstruktor Erstellungsdatum: (15.06.2003 12:03:36)
      *
