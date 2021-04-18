@@ -29,11 +29,12 @@ public class Card implements Comparable {
     public static final int ZEHN = 13;
     public static final int AS = 14;
 
-    public static final Card COVERED = new Card();
+    public static final Card COVERED = new Card(-1);
+    public static final Card GHOST = new Card(0); // represents an invisible placeholder
 
-    private Card() {
-        this.color = -1;
-        this.value = -1;
+    private Card(int i) {
+        this.color = i;
+        this.value = i;
     }
 
     /**

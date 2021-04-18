@@ -1,6 +1,5 @@
 package cardgame;
 
-import cardgame.Card;
 import cardgame.messages.GameStack;
 import java.awt.Point;
 import java.util.List;
@@ -19,11 +18,13 @@ public class GameStackProperties {
     }
 
     private void initialize(int size) {
+        cards.clear();
         cardFlips = new int[size];
         rotation = new float[size];
         offset = new Point[size];
         for (int i = 0; i < size; i++) {
             offset[i] = new Point();
+            cards.add(Card.GHOST);
         }
         shakeAll();
     }
@@ -37,7 +38,6 @@ public class GameStackProperties {
     }
 
     public void shakeAll() {
-        boolean shallFlip = false;
         clearFlips();
         for (int i = 0; i < cardFlips.length; i++) {
             shake(i, 0);
