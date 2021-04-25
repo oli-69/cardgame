@@ -11,10 +11,20 @@ public class GameStackProperties {
     public float[] rotation = new float[]{0f, 0f, 0f};
     public int[] cardFlips;
 
+    private final int maxXOffset;
+    private final int maxYOffset;
+    private final float maxRot;
+    
     public GameStackProperties(List<Card> cards, int size) {
+        this( cards, size, 10, 5, 3.5f);
+    }
+    
+    public GameStackProperties(List<Card> cards, int size, int maxX, int maxY, float rot) {
         this.cards = cards;
+        this.maxXOffset = maxX;
+        this.maxYOffset = maxY;
+        this.maxRot = rot;
         initialize(size);
-
     }
 
     private void initialize(int size) {
@@ -63,11 +73,11 @@ public class GameStackProperties {
     }
 
     private void rotate(int id) {
-        rotation[id] = getRandomRotation(3.5f);
+        rotation[id] = getRandomRotation(maxRot);
     }
 
     public void offset(int id) {
-        offset[id].setLocation(getRandomOffset(10), getRandomOffset(5));
+        offset[id].setLocation(getRandomOffset(maxXOffset), getRandomOffset(maxYOffset));
     }
 
     private float getRandomRotation(float max) {
