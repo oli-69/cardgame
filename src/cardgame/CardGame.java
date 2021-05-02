@@ -374,7 +374,17 @@ public abstract class CardGame {
      * @param text the text to be send to the chat.
      */
     public void chat(String text) {
-        chat(text, null);
+        chat(text, false);
+    }
+
+    /**
+     * Sends a chat message to all clients.
+     *
+     * @param text the text to be send to the chat.
+     * @param beep if the client must beep.
+     */
+    public void chat(String text, boolean beep) {
+        chat(text, null, beep);
     }
 
     /**
@@ -384,8 +394,19 @@ public abstract class CardGame {
      * @param sender the sending player.
      */
     public void chat(String text, Player sender) {
+        chat(text, sender, false);
+    }
+
+    /**
+     * Sends a chat message to all clients.
+     *
+     * @param text the text to be send to the chat.
+     * @param sender the sending player.
+     * @param beep if the client must beep.
+     */
+    public void chat(String text, Player sender, boolean beep) {
         if (text != null && !text.trim().isEmpty()) {
-            ChatMessage chatMessage = new ChatMessage(text, sender);
+            ChatMessage chatMessage = new ChatMessage(text, sender, beep);
             sendToPlayers(gson.toJson(chatMessage));
         }
     }
