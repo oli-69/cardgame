@@ -449,13 +449,26 @@ public abstract class CardGame {
      */
     public static class CardComparator implements Comparator<Card> {
 
+        public enum TYPE {
+            ASCENDING, DESCENDING
+        };
+        private final TYPE type;
         private int trump;
+
+        public CardComparator(TYPE type) {
+            this(0, type);
+        }
 
         public CardComparator() {
             this(0);
         }
 
         public CardComparator(int trump) {
+            this(trump, TYPE.ASCENDING);
+        }
+
+        public CardComparator(int trump, TYPE type) {
+            this.type = type;
             this.trump = trump;
         }
 
@@ -468,13 +481,13 @@ public abstract class CardGame {
             int color1 = o1.getColor() == trump ? 5 : o1.getColor();
             int color2 = o2.getColor() == trump ? 5 : o2.getColor();
             if (color1 > color2) {
-                return 1;
+                return type == TYPE.ASCENDING ? 1 : -1;
             } else if (color1 < color2) {
-                return -1;
+                return type == TYPE.ASCENDING ? -1 : 1;
             } else if (o1.getValue() > o2.getValue()) {
-                return 1;
+                return type == TYPE.ASCENDING ? 1 : -1;
             } else if (o1.getValue() < o2.getValue()) {
-                return -1;
+                return type == TYPE.ASCENDING ? -1 : 1;
             }
             return 0; // corrupt card stack ;-)
         }
