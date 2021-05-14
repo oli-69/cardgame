@@ -14,11 +14,11 @@ public class GameStackProperties {
     private final int maxXOffset;
     private final int maxYOffset;
     private final float maxRot;
-    
+
     public GameStackProperties(List<Card> cards, int size) {
-        this( cards, size, 10, 5, 3.5f);
+        this(cards, size, 10, 5, 3.5f);
     }
-    
+
     public GameStackProperties(List<Card> cards, int size, int maxX, int maxY, float rot) {
         this.cards = cards;
         this.maxXOffset = maxX;
@@ -48,9 +48,13 @@ public class GameStackProperties {
     }
 
     public void shakeAll() {
+        shakeAll(false);
+    }
+
+    public void shakeAll(boolean flips) {
         clearFlips();
         for (int i = 0; i < cardFlips.length; i++) {
-            shake(i, 0);
+            shake(i, (flips && shallFlip()) ? getRandomFlips() : 0);
         }
     }
 
