@@ -39,6 +39,7 @@ public abstract class CardGame {
     protected final Gson gson;
 
     protected Player mover = null; // this is like the cursor or pointer of the player which has to move.
+    protected int gameCounter = 0;
 
     private final PropertyChangeSupport propChangeSupport;
     private final int cardsCount;
@@ -47,6 +48,8 @@ public abstract class CardGame {
     private final List<WebradioUrl> webradioList;
     private final PropertyChangeListener playerListener;
 
+    private long lastGameActivity;
+    private long gameTimeout; // in millis
     private boolean webradioPlaying = true;
     private WebradioUrl radioUrl = null;
 
@@ -81,6 +84,33 @@ public abstract class CardGame {
 
     protected void firePropertyChange(String popertyName, Object oldValue, Object newValue) {
         propChangeSupport.firePropertyChange(popertyName, oldValue, newValue);
+    }
+
+    protected boolean checkGameTimeout() {
+        if (gameTimeout > 0
+                && !players.isEmpty() 
+                && (lastGameActivity + gameTimeout) < System.currentTimeMillis()) {
+            LOGGER.info("Game timed out");
+            stopGame();
+            List<Player> playersInRoom = new ArrayList<>();
+            playersInRoom.addAll(players);
+            playersInRoom.forEach(player -> {
+                removePlayerFromRoom(player);
+                try {
+                    player.getSocket().close();
+                } catch (Exception e) {
+                    LOGGER.error("Unable to close connection of Player " + player.getName(), e);
+                }
+            });
+            gameCounter = 0;
+            return true;
+        }
+        return false;
+    }
+
+    private void updateLastGameActivity() {
+        this.lastGameActivity = System.currentTimeMillis();
+//        LOGGER.debug("Last Game Activity: " + DateFormat.getTimeInstance().format(new Date(lastGameActivity)));
     }
 
     /**
@@ -139,6 +169,15 @@ public abstract class CardGame {
                 allCards.add(new Card(color, value));
             }
         }
+    }
+
+    /** 
+     * Set the game timeout. The game will reset after this time without any 
+     * user activity.
+     * @param gameTimeout gameTimeout in minutes. 
+     */
+    public void setGameTimeout(int gameTimeout) {
+        this.gameTimeout = gameTimeout * 1000 * 60;
     }
 
     /**
@@ -256,6 +295,7 @@ public abstract class CardGame {
         String msg = player.getName() + " ist dazugekommen";
         chat(msg);
         LOGGER.info(msg);
+        updateLastGameActivity();
     }
 
     /**
@@ -341,9 +381,9 @@ public abstract class CardGame {
     public abstract String getGameState(Player player);
 
     protected void playerPropertyChanged(PropertyChangeEvent evt) {
+        Player player = (Player) evt.getSource();
         switch (evt.getPropertyName()) {
             case Player.PROP_LOGOUT:
-                Player player = (Player) evt.getSource();
                 removePlayerFromRoom(player);
                 break;
             case Player.PROP_ONLINE:
@@ -352,6 +392,9 @@ public abstract class CardGame {
             case Player.PROP_SOCKETMESSAGE:
                 processMessage((Player) evt.getSource(), (SocketMessage) evt.getNewValue());
                 break;
+        }
+        if (player.isOnline()) {
+            updateLastGameActivity();
         }
     }
 

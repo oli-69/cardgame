@@ -159,6 +159,7 @@ public abstract class PlayerSocket {
         }
         if (errorMsg != null) {
             sendString(gson.toJson(new LoginError(errorMsg)));
+            LOGGER.info("LOGIN FAILED: " + errorMsg);
             return false;
         }
         return true;
@@ -194,8 +195,8 @@ public abstract class PlayerSocket {
                 player.setSocket(this);
                 sendString(successMessage);
             }
-        }
         LOGGER.info("LOGIN " + name);
+        } 
     }
 
     private synchronized void processMessage(SocketMessage socketMessage) {

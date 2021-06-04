@@ -45,7 +45,7 @@ public class GameServer {
     protected static final class PingWatchdog {
 
         private final CardGame game;
-        private final long interval = 1000 * 60 * 3;
+        private final long interval = 1000 * 30;
         private final Timer timer;
 
         public PingWatchdog(CardGame game) {
@@ -62,6 +62,7 @@ public class GameServer {
                 @Override
                 public void run() {
                     game.sendPing();
+                    game.checkGameTimeout();
                     timer.schedule(getTask(), interval);
                 }
             };
