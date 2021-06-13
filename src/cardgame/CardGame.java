@@ -88,7 +88,7 @@ public abstract class CardGame {
 
     protected boolean checkGameTimeout() {
         if (gameTimeout > 0
-                && !players.isEmpty() 
+                && !players.isEmpty()
                 && (lastGameActivity + gameTimeout) < System.currentTimeMillis()) {
             LOGGER.info("Game timed out");
             stopGame();
@@ -102,6 +102,7 @@ public abstract class CardGame {
                     LOGGER.error("Unable to close connection of Player " + player.getName(), e);
                 }
             });
+            mover = null;
             gameCounter = 0;
             return true;
         }
@@ -171,10 +172,11 @@ public abstract class CardGame {
         }
     }
 
-    /** 
-     * Set the game timeout. The game will reset after this time without any 
+    /**
+     * Set the game timeout. The game will reset after this time without any
      * user activity.
-     * @param gameTimeout gameTimeout in minutes. 
+     *
+     * @param gameTimeout gameTimeout in minutes.
      */
     public void setGameTimeout(int gameTimeout) {
         this.gameTimeout = gameTimeout * 1000 * 60;
@@ -310,6 +312,9 @@ public abstract class CardGame {
         }
         player.removePropertyChangeListener(playerListener);
         players.remove(player);
+        if (players.isEmpty()) {
+            mover = null;
+        }
         firePropertyChange(PROP_PLAYERLIST, null, players);
         String msg = "Spieler " + player.getName() + " ist gegangen";
         chat(msg);
