@@ -184,7 +184,7 @@ public abstract class PlayerSocket {
         byte[] pwd = jsonObj.get("pwd").getAsString().getBytes();
         if (validateLoginData(name, pwd)) {
             Player player = game.getPlayer(name);
-            String successMessage = gson.toJson(new LoginSuccess(game.getVideoRoomName()));
+            String successMessage = gson.toJson(new LoginSuccess(game.getVideoRoomName(), game.getRadioList()));
             if (player == null) {
                 player = createPlayer(name);
                 game.addPlayerToRoom(player);

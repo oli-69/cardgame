@@ -42,6 +42,17 @@ public class GameServer {
         return radioList;
     }
 
+    protected static List<String> getAdminNames(Properties settings) {
+        String[] names = settings.getProperty("adminNames", "").split(",");
+        List<String> adminNames = new ArrayList<>(names.length);
+        for (String name : names) {
+            if (!name.isEmpty()) {
+                adminNames.add(name.trim());
+            }
+        }
+        return adminNames;
+    }
+
     protected static final class PingWatchdog {
 
         private final CardGame game;

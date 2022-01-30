@@ -38,6 +38,7 @@ public abstract class CardGame {
     protected final List<Player> attendees; // sub-list of players, which are actually in the game (alive).
     protected final Gson gson;
 
+    protected Player activeAdmin = null; // the currently active admin, if any. 
     protected Player mover = null; // this is like the cursor or pointer of the player which has to move.
     protected int gameCounter = 0;
 
@@ -46,6 +47,7 @@ public abstract class CardGame {
     private final List<Card> allCards; // Alle Karten
     private final List<Card> bigStack;
     private final List<WebradioUrl> webradioList;
+    private final List<String> adminNames;
     private final PropertyChangeListener playerListener;
 
     private long lastGameActivity;
@@ -53,7 +55,7 @@ public abstract class CardGame {
     private boolean webradioPlaying = true;
     private WebradioUrl radioUrl = null;
 
-    public CardGame(int cardsCount, String conferenceName, List<WebradioUrl> webradioList) {
+    public CardGame(int cardsCount, String conferenceName, List<WebradioUrl> webradioList, List<String> adminNames) {
         if (cardsCount != CARDS_24 && cardsCount != CARDS_32 && cardsCount != CARDS_52) {
             throw new IllegalArgumentException("Unkown count of cards.");
         }
@@ -72,6 +74,7 @@ public abstract class CardGame {
             radioUrl = webradioList.iterator().next();
         }
         videoRoomName = conferenceName;
+        this.adminNames = adminNames;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener pl) {
@@ -170,6 +173,38 @@ public abstract class CardGame {
                 allCards.add(new Card(color, value));
             }
         }
+    }
+
+    /**
+     * Find the player with the admin role.
+     *
+     * @return the first player which is in the admin list, logged in and
+     * currently online.
+     */
+    private Player findAdmin() {
+        for (String name : adminNames) {
+            for (Player player : players) {
+                if (player.isOnline() && player.getName().equals(name)) {
+                    return player;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void updateActiveAdmin() {
+        this.activeAdmin = findAdmin();
+        LOGGER.info("Active Admin: " + activeAdmin);
+    }
+
+    /**
+     * Getter for active admin.
+     *
+     * @return the first player which is in the admin list, logged in and
+     * currently online. Can be null.
+     */
+    public Player getActiveAdmin() {
+        return activeAdmin;
     }
 
     /**
@@ -293,6 +328,7 @@ public abstract class CardGame {
         }
         player.addPropertyChangeListener(playerListener);
         players.add(player);
+        updateActiveAdmin();
         firePropertyChange(PROP_PLAYERLIST, null, players);
         String msg = player.getName() + " ist dazugekommen";
         chat(msg);
@@ -319,6 +355,7 @@ public abstract class CardGame {
         String msg = "Spieler " + player.getName() + " ist gegangen";
         chat(msg);
         LOGGER.info(msg);
+        updateActiveAdmin();
     }
 
     /**
@@ -392,6 +429,7 @@ public abstract class CardGame {
                 removePlayerFromRoom(player);
                 break;
             case Player.PROP_ONLINE:
+                updateActiveAdmin();
                 firePropertyChange(PROP_PLAYER_ONLINE, null, evt.getSource());
                 break;
             case Player.PROP_SOCKETMESSAGE:
